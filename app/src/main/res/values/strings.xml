@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">SmartHome</string>
+    <string name="title_activity_login">Login</string>
+    <string name="title_activity_menu">Menu</string>
+    <string name="email_hint">Correo</string>
+    <string name="password_hint">Contraseña</string>
+    <string name="login_button_label">Iniciar</string>
+    <string name="sign_up_text">Sign Up!</string>
+    <string name="sign_up_button_label">Sign Up</string>
+
+</resources>
