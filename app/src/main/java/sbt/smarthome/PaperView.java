@@ -5,11 +5,11 @@ import android.graphics.Canvas;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import sbt.smarthome.model.Room;
+import sbt.smarthome.rooms.core.Room;
+import sbt.smarthome.rooms.core.RoomParent;
 
 /**
  * Created by jormelcn on 7/12/16.
@@ -17,7 +17,7 @@ import sbt.smarthome.model.Room;
  */
 public class PaperView extends View implements ScaleGestureDetector.OnScaleGestureListener {
 
-    private Room mainRoom;
+    private RoomParent mainRoom;
     ScaleGestureDetector scaleGestureDetector;
 
     private float prevPointerX;
@@ -53,13 +53,11 @@ public class PaperView extends View implements ScaleGestureDetector.OnScaleGestu
 
     }
 
-    public void setMainRoom(Room mainRoom){
+    public void setMainRoom(RoomParent mainRoom){
         this.mainRoom = mainRoom;
-
     }
 
     protected void onDraw(Canvas canvas) {
-
         if(mainRoom == null)
             return;
 
@@ -143,8 +141,7 @@ public class PaperView extends View implements ScaleGestureDetector.OnScaleGestu
                 break;
             case MotionEvent.ACTION_DOWN:
                 try {
-                    findroom= mainRoom.findRoomDim(currentPointerX,currentPointerY);
-                    //Log.d("find","ID="+findroom.getId());
+
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -226,7 +223,7 @@ public class PaperView extends View implements ScaleGestureDetector.OnScaleGestu
 
     }
 
-    static class SavedState extends BaseSavedState {
+    private static class SavedState extends BaseSavedState {
 
         float scale;
         float displayCenterX;

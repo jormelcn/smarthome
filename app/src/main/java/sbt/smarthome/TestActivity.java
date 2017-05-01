@@ -4,11 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -19,19 +19,16 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Scanner;
+import java.io.InputStreamReader;
 
 import sbt.smarthome.basequery.BaseHome;
-import sbt.smarthome.model.FanRoom;
-import sbt.smarthome.model.LightRoom;
-import sbt.smarthome.model.Room;
-import sbt.smarthome.xml.RoomParser;
+import sbt.smarthome.rooms.core.RoomParent;
+import sbt.smarthome.rooms.core.RoomParser;
 
 public class TestActivity extends Activity{
 
@@ -41,6 +38,13 @@ public class TestActivity extends Activity{
     private FirebaseAuth firebaseAuth;
 
 
+    private void paintHouse(InputStream houseMap){
+        RoomParser parser = new RoomParser();
+        paperView = (PaperView) findViewById(R.id.paper_view);
+        RoomParent mainRoom = parser.parse(houseMap);
+        paperView.setMainRoom(mainRoom);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,13 +52,19 @@ public class TestActivity extends Activity{
         firebaseAuth = FirebaseAuth.getInstance();
         storage = FirebaseStorage.getInstance();
 
+        try {
+            paintHouse(getAssets().open("house_test.xml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         DatabaseReference databaseUser = FirebaseDatabase.getInstance().getReference();
         DatabaseReference ref = databaseUser.child("usuarios").child(firebaseAuth.getCurrentUser().getUid());
         ref.child("casas").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-                if(dataSnapshot.getValue(Boolean.class)==true) {
+                if(dataSnapshot.getValue(Boolean.class)) {
                     FirebaseDatabase.getInstance().getReference().child("Casas").child(dataSnapshot.getKey())
                     .addValueEventListener(new ValueEventListener() {
                         @Override
@@ -69,12 +79,7 @@ public class TestActivity extends Activity{
                                         try {
                                             File initialFile = new File(localFile.getAbsolutePath());
                                             InputStream targetStream = new FileInputStream(initialFile);
-                                            RoomParser parser = new RoomParser();
-                                            Room mainRoom = null;
-                                            mainRoom = parser.parse(targetStream);
-                                            paperView = (PaperView) findViewById(R.id.paper_view);
-                                            paperView.setMainRoom(mainRoom);
-                                            paperView.invalidate();
+                                            paintHouse(targetStream);
                                         } catch (FileNotFoundException e) {
                                             e.printStackTrace();
                                         }
