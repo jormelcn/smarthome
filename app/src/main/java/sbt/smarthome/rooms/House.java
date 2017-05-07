@@ -1,6 +1,4 @@
 package sbt.smarthome.rooms;
-
-import android.content.Context;
 import android.graphics.Canvas;
 
 import sbt.smarthome.rooms.core.RoomParameters;
@@ -22,7 +20,8 @@ public class House extends RoomParent {
     }
 
     @Override
-    protected void onDraw(Context context, Canvas canvas, float originLeft, float originTop, float density) {
+    protected void onDraw(Canvas canvas, float originLeft, float originTop, float density) {
         canvas.drawColor(backgroundColor);
     }
+
 }

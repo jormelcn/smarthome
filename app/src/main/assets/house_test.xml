@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <House
     id="1"
+    name="House Room"
     width="1000"
     height="1000">
 
     <HouseArea
         id="2"
+        name="Room 2"
         left="20"
         top="20"
         width="300"
@@ -14,6 +16,7 @@
 
     <HouseArea
         id="3"
+        name="Room 3"
         left="340"
         top="20"
         width="300"
@@ -21,7 +24,8 @@
     </HouseArea>
 
     <HouseArea
-        id="3"
+        id="4"
+        name="Room 4"
         light="1"
         left="20"
         top="340"
@@ -30,20 +34,24 @@
     </HouseArea>
 
     <HouseArea
-        id="3"
+        id="5"
+        name="Room 5"
         light="1"
         left="20"
         top="480"
         width="620"
         height="500">
 
-        <Fan id="5"
+        <Fan id="6"
+            name="Fan Room"
             left= "260"
             top = "200"
             width="100"
             height="100"/>
 
-        <Light radius = "150"
+        <Light id="7"
+            name="Light Room 1"
+            radius = "150"
             left="35"
             top="50"
             lightColor="blue"
@@ -52,14 +60,17 @@
     </HouseArea>
 
     <HouseArea
-        id="4"
+        id="8"
+        name="Room 8"
         light="1"
         left="660"
         top="700"
         width="300"
         height="280">
 
-        <Light radius = "50"
+        <Light id="9"
+            name="Light Room 2"
+            radius = "50"
             left="110"
             top="90"
             light="1"/>
@@ -67,7 +78,8 @@
     </HouseArea>
 
     <HouseArea
-        id="4"
+        id="10"
+        name="Room 10"
         light="1"
         left="640"
         top="480"

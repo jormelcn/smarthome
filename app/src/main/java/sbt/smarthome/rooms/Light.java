@@ -1,12 +1,12 @@
 package sbt.smarthome.rooms;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
 import sbt.smarthome.rooms.core.Room;
 import sbt.smarthome.rooms.core.RoomParameters;
+import sbt.smarthome.rooms.core.State;
 
 /**
  * Created by godi22 on 14/12/16.
@@ -37,34 +37,27 @@ public class Light extends Room {
     }
 
     @Override
-    protected void onDraw(Context context, Canvas canvas, float originLeft, float originTop, float density) {
-        int alpha = Math.round(light*0x80);
+    protected void onDraw(Canvas canvas, float originLeft, float originTop, float density) {
+        int alpha = Math.round(light*0xA0);
         int color = ((alpha<<24)&0xff000000)|(lightColor&0x00ffffff);
         paint.setColor(color);
         canvas.drawOval(new RectF(originLeft, originTop, originLeft + width * density, originTop + height * density), paint);
     }
 
-    /*@Override
-    protected void onDraw(Context context, Canvas canvas, float left, float top, float right, float bot, float ratio) {
-        super.onDraw(context, canvas, left, top, right, bot, ratio);
+    @Override
+    protected void onClick() {
+        if(light <= 0.4f){
+            light = 1;
+        }else {
+            light = 0.4f;
+        }
+        sync(new State(LIGHT, light));
+        refresh();
+    }
 
-        this.r=50;
-
-        int LightColor;
-
-        if(on)
-            LightColor=onColor;
-        else
-            LightColor=offColor;
-
-        paint.setColor(LightColor);
-        paint.setStyle(Paint.Style.FILL);
-
-        CX=(left+right)/2;
-        CY=(top+bot)/2;
-        canvas.drawCircle(CX,CY,this.r,paint);
-        //Log.d("STATE", "left="+CX+"  top="+CY);
-
-
-    }*/
+    @Override
+    protected void onSync(State state) {
+        light = state.get(LIGHT, light);
+        refresh();
+    }
 }

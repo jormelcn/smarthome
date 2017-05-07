@@ -1,38 +1,23 @@
 package sbt.smarthome;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
-import sbt.smarthome.basequery.BaseHome;
-import sbt.smarthome.rooms.core.RoomParent;
+import sbt.smarthome.rooms.House;
+import sbt.smarthome.rooms.core.HouseServer;
+import sbt.smarthome.rooms.core.HouseView;
 import sbt.smarthome.rooms.core.RoomParser;
 
 public class TestActivity extends Activity{
 
-    PaperView paperView;
+    HouseView houseView;
     private FirebaseStorage storage;
     private StorageReference storageRef;
     private FirebaseAuth firebaseAuth;
@@ -40,9 +25,11 @@ public class TestActivity extends Activity{
 
     private void paintHouse(InputStream houseMap){
         RoomParser parser = new RoomParser();
-        paperView = (PaperView) findViewById(R.id.paper_view);
-        RoomParent mainRoom = parser.parse(houseMap);
-        paperView.setMainRoom(mainRoom);
+        houseView = (HouseView) findViewById(R.id.house_view);
+        House house = (House) parser.parse(houseMap);
+        HouseServer houseServer = new HouseServer();
+        houseView.connectToServer(houseServer);
+        houseView.paintHouse(house);
     }
 
     @Override
@@ -57,7 +44,7 @@ public class TestActivity extends Activity{
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        /*
         DatabaseReference databaseUser = FirebaseDatabase.getInstance().getReference();
         DatabaseReference ref = databaseUser.child("usuarios").child(firebaseAuth.getCurrentUser().getUid());
         ref.child("casas").addChildEventListener(new ChildEventListener() {
@@ -126,7 +113,7 @@ public class TestActivity extends Activity{
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        });*/
 
     }
 

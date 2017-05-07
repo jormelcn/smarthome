@@ -1,8 +1,8 @@
 package sbt.smarthome.rooms.core;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Region;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,18 +21,51 @@ public abstract class RoomParent extends Room {
         super(parameters);
     }
 
-    public void draw(Context context, Canvas canvas, float originLeft, float originTop, float density){
+    @Override
+    protected void setHouseView(HouseView houseView) {
+        super.setHouseView(houseView);
+        for(Room child: children){
+            child.setHouseView(houseView);
+        }
+    }
+
+    @Override
+    public void draw(Canvas canvas, float originLeft, float originTop, float density){
         if(visible) {
             float xi = originLeft + this.left * density;
             float yi = originTop + this.top * density;
             float xf = xi + this.width * density;
             float yf = yi + this.height * density;
             canvas.clipRect(xi, yi, xf, yf, Region.Op.REPLACE);
-            onDraw(context, canvas, xi, yi, density);
+            onDraw(canvas, xi, yi, density);
             for(Room child: children){
-                child.draw(context, canvas, xi, yi, density);
+                child.draw(canvas, xi, yi, density);
             }
         }
+    }
+
+    @Override
+    public boolean click(float x, float y, float originLeft, float originTop, float density){
+        if(visible) {
+            if (
+                    (x > originLeft) &&
+                    (x < originLeft + width * density) &&
+                    (y > originTop) &&
+                    (y < originTop + height * density)
+            ) {
+                for (Room child : children) {
+                    float childLeft = originLeft + child.left * density;
+                    float childTop = originTop + child.top * density;
+                    if (child.click(x, y, childLeft, childTop, density)) {
+                        return true;
+                    }
+                }
+                Log.i("ROOM_INFORMER", "OnClick: " + name);
+                onClick();
+                return true;
+            }
+        }
+       return false;
     }
 
     void addChild(Room room){

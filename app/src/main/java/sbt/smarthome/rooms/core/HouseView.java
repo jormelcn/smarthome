@@ -1,24 +1,29 @@
-package sbt.smarthome;
+package sbt.smarthome.rooms.core;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import sbt.smarthome.rooms.core.Room;
-import sbt.smarthome.rooms.core.RoomParent;
+
+import sbt.smarthome.rooms.House;
 
 /**
  * Created by jormelcn on 7/12/16.
  *
  */
-public class PaperView extends View implements ScaleGestureDetector.OnScaleGestureListener {
+public class HouseView
+        extends View
+        implements ScaleGestureDetector.OnScaleGestureListener, GestureDetector.OnGestureListener, HouseServer.SyncListener {
 
-    private RoomParent mainRoom;
+    private House houseRoom;
+    private HouseServer houseServer;
+
     ScaleGestureDetector scaleGestureDetector;
+    GestureDetector clickDetector;
 
     private float prevPointerX;
     private float prevPointerY;
@@ -40,38 +45,46 @@ public class PaperView extends View implements ScaleGestureDetector.OnScaleGestu
     private float currentScale = 0;
 
     Canvas canvas;
-    Bitmap img;
 
-    public PaperView(Context context, AttributeSet attrs) {
+    public HouseView(Context context, AttributeSet attrs) {
         super(context, attrs);
         scaleGestureDetector = new ScaleGestureDetector(context, this);
+        clickDetector = new GestureDetector(context, this);
     }
 
-    public PaperView(Context context) {
+    public HouseView(Context context) {
         super(context);
         scaleGestureDetector = new ScaleGestureDetector(context, this);
-
     }
 
-    public void setMainRoom(RoomParent mainRoom){
-        this.mainRoom = mainRoom;
+    public void paintHouse(House houseRoom){
+        this.houseRoom = houseRoom;
+        houseRoom.setHouseView(this);
+    }
+
+    public void connectToServer(HouseServer houseServer){
+        this.houseServer = houseServer;
+        houseServer.setSyncListener(this);
+    }
+
+    protected HouseServer getServer(){
+        return houseServer;
     }
 
     protected void onDraw(Canvas canvas) {
-        if(mainRoom == null)
+        if(houseRoom == null)
             return;
 
         if(this.canvas == null || this.canvas != canvas){
 
-            float scaleHorizontal = (float) canvas.getWidth()/ mainRoom.getWidth();
-            float scaleVertical = (float) canvas.getHeight()/mainRoom.getHeight();
+            float scaleHorizontal = (float) canvas.getWidth()/ houseRoom.getWidth();
+            float scaleVertical = (float) canvas.getHeight()/ houseRoom.getHeight();
             if(scaleHorizontal < scaleVertical){
                 initScale = scaleHorizontal;
-                mainRoomTop = Math.round ((canvas.getHeight() - mainRoom.getHeight() * initScale)/2);
-
+                mainRoomTop = Math.round ((canvas.getHeight() - houseRoom.getHeight() * initScale)/2);
             }else{
                 initScale = scaleVertical;
-                mainRoomLeft = Math.round ((canvas.getWidth() - mainRoom.getWidth() * initScale)/2);
+                mainRoomLeft = Math.round ((canvas.getWidth() - houseRoom.getWidth() * initScale)/2);
             }
 
             if(currentScale == 0){
@@ -112,7 +125,7 @@ public class PaperView extends View implements ScaleGestureDetector.OnScaleGestu
 
         canvas.translate(translateX / zoom, translateY / zoom);
 
-        mainRoom.draw(getContext(), canvas, mainRoomLeft, mainRoomTop, initScale);
+        houseRoom.draw(canvas, mainRoomLeft, mainRoomTop, initScale);
 
         canvas.restore();
 
@@ -128,7 +141,6 @@ public class PaperView extends View implements ScaleGestureDetector.OnScaleGestu
         float currentPointerX = event.getX();
         float currentPointerY = event.getY();
         int currentPointerId = event.getPointerId(event.getActionIndex());
-        Room findroom;
 
         switch (event.getActionMasked()) {
 
@@ -139,13 +151,6 @@ public class PaperView extends View implements ScaleGestureDetector.OnScaleGestu
                     invalidate();
                 }
                 break;
-            case MotionEvent.ACTION_DOWN:
-                try {
-
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-                break;
         }
 
         prevPointerX = currentPointerX;
@@ -153,6 +158,7 @@ public class PaperView extends View implements ScaleGestureDetector.OnScaleGestu
         prevPointerId = currentPointerId;
 
         scaleGestureDetector.onTouchEvent(event);
+        clickDetector.onTouchEvent(event);
 
         return true;
     }
@@ -221,6 +227,50 @@ public class PaperView extends View implements ScaleGestureDetector.OnScaleGestu
 
         super.onRestoreInstanceState(savedState.getSuperState());
 
+    }
+
+    @Override
+    public boolean onDown(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent motionEvent) {
+        if(canvas != null) {
+            float zoom = currentScale/initScale;
+            float x = (motionEvent.getX() - translateX)/zoom;
+            float y = (motionEvent.getY() - translateY)/zoom;
+           houseRoom.click(x, y, mainRoomLeft, mainRoomTop, initScale);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+        return false;
+    }
+
+    @Override
+    public void onSync(int id, State state) {
+        Room room = houseRoom.findRoomById(id);
+        if(room != null){
+            room.onSync(state);
+        }
     }
 
     private static class SavedState extends BaseSavedState {

@@ -28,15 +28,16 @@ public class HouseArea extends RoomParent{
     }
 
     @Override
-    public void draw(Context context, Canvas canvas, float originLeft, float originTop, float density) {
-        super.draw(context, canvas, originLeft, originTop, density);
+    public void draw(Canvas canvas, float originLeft, float originTop, float density) {
+        super.draw(canvas, originLeft, originTop, density);
         int alpha = Math.round((1  - light)*255);
         int lightColor = (alpha<<24)&0xff000000;
         canvas.drawColor(lightColor);
     }
 
     @Override
-    protected void onDraw(Context context, Canvas canvas, float originLeft, float originTop, float density) {
+    protected void onDraw(Canvas canvas, float originLeft, float originTop, float density) {
         canvas.drawColor(backgroundColor);
     }
+
 }
